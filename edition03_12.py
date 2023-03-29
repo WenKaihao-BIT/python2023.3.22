@@ -22,6 +22,7 @@ import datetime
 from Camera_Thread import Camera_Thread
 from Image_process import FindTarget
 
+
 class Ui_MainWindow(QtWidgets.QWidget):
     def __init__(self):
 
@@ -35,7 +36,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
         self.button_connect()
 
         ## camera
-        self.Camera=Camera_Thread()
+        self.Camera = Camera_Thread()
         self.flag = 0
         self.img = []
 
@@ -67,10 +68,10 @@ class Ui_MainWindow(QtWidgets.QWidget):
             item.id = key
             item.addItems(['9600', '19200', '38400', '57600', '115200'])
             item.currentIndexChanged[str].connect(self.select_rate)
-        #sin 函数
-        self.lineEdit_sin={'A':self.lineEdit_A,'F':self.lineEdit_F,'D':self.lineEdit_D,'DB':self.lineEdit_B}
-        for key ,item in self.lineEdit_sin.items():
-            item.id =key
+        # sin 函数
+        self.lineEdit_sin = {'A': self.lineEdit_A, 'F': self.lineEdit_F, 'D': self.lineEdit_D, 'DB': self.lineEdit_B}
+        for key, item in self.lineEdit_sin.items():
+            item.id = key
             item.editingFinished.connect(self.sin_get)
         ## light
         self.light = 0
@@ -85,12 +86,9 @@ class Ui_MainWindow(QtWidgets.QWidget):
         self.graphicsView_y.setBackground('w')
         self.flag_plot = 0
 
-        self.f =[]
+        self.f = []
         self.save_data = open("D:/PY_Project/python_2022_8_3/test_save.txt", "w")
         self.count = 0
-
-
-
 
         # sin
         self.sin_A = 0.3
@@ -131,10 +129,11 @@ class Ui_MainWindow(QtWidgets.QWidget):
         # sin 函数
         self.checkBox_sin.stateChanged.connect(self.SinDataSend)
         self.checkBox_Adaptive.stateChanged.connect(self.SinRun)
-        self.checkBox_Sine_F.stateChanged.connect(self.UserDefine)
-        self.wave=[]
-        self.wave_len=0
-
+        self.checkBox_Sine_F.stateChanged.connect(self.sin_F_swap)
+        self.checkBox_user.stateChanged.connect(self.UserDefine)
+        self.checkBox_Random.stateChanged.connect(self.M_randam)
+        self.wave = []
+        self.wave_len = 0
 
         # send
         self.timer_send.timeout.connect(self.sindata)
@@ -1049,7 +1048,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
     def ReadCamera(self):
         # self.CameraNum = self.spinBox_Camera_select.text()
-        self.Camera.Camera_ID=self.spinBox_Camera_select.text()
+        self.Camera.Camera_ID = self.spinBox_Camera_select.text()
         # print("相机编号为"+self.CameraNum)
         self.label_information.setText("camera ID :" + self.Camera.Camera_ID)
         pass
@@ -1084,7 +1083,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
         pass
 
     ## show the image of camera
-    def show_viedo(self,msg):
+    def show_viedo(self, msg):
         # print(msg)
         # ret, self.img = self.cap_video.read()
         ret, self.img = self.Camera.cap_video.read()
@@ -1110,7 +1109,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
     ## 图像处理算法
     def image_processing(self, img):
         # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img_processed,self.Camera.cx,self.Camera.cy = FindTarget(img)
+        img_processed, self.Camera.cx, self.Camera.cy = FindTarget(img)
         shrink = cv2.cvtColor(img_processed, cv2.COLOR_BGR2RGB)
         QtImg = QtGui.QImage(shrink.data,
                              shrink.shape[1],
@@ -1239,7 +1238,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
         self.data_motor2 = self.ser_motor2.receivedata()
         data_motor2_temp = self.DataAnlysis(self.data_motor2, 'PFB<D8>')
-        print('\n\n'+self.data_motor2+'\n'+self.data_motor2.encode().hex()+'\n'+data_motor2_temp+'\n\n')
+        print('\n\n' + self.data_motor2 + '\n' + self.data_motor2.encode().hex() + '\n' + data_motor2_temp + '\n\n')
 
     def plot_enable(self):
         if self.flag_motor1 and self.flag_motor2:
@@ -1266,7 +1265,6 @@ class Ui_MainWindow(QtWidgets.QWidget):
                 self.curve_motor2 = self.graphicsView_motor2.plot(self.motor2_plot)
                 self.curve_x = self.graphicsView_x.plot(self.img_x_plot)
                 self.curve_y = self.graphicsView_y.plot(self.img_y_plot)
-
 
                 ## 打开时钟信号
                 self.timer_plot.start(50)
@@ -1334,11 +1332,11 @@ class Ui_MainWindow(QtWidgets.QWidget):
         # motor2
         if self.data_motor2:
             # 串口格式转换
-            data_motor2_temp=self.DataAnlysis(self.data_motor2,'PFB<D8>')
+            data_motor2_temp = self.DataAnlysis(self.data_motor2, 'PFB<D8>')
             if data_motor2_temp:
-                self.data_motor2= data_motor2_temp
+                self.data_motor2 = data_motor2_temp
                 # print(self.data_motor2)
-                self.save_data.write(self.data_motor2+dt_ms+'\n')
+                self.save_data.write(self.data_motor2 + dt_ms + '\n')
                 self.label_distance_Motor2.setText(self.data_motor2)
                 self.data_motor2 = float(self.data_motor2)
                 #   绘制图形
@@ -1383,11 +1381,12 @@ class Ui_MainWindow(QtWidgets.QWidget):
             self.ser_motor3.rate = int(chekbox.currentText())
             self.label_information.setText("motor3 rate : " + chekbox.currentText())
         # self.ser_motor1.rate =
+
     def sin_get(self):
-        chekbox =self.sender()
-        print(chekbox)
+        chekbox = self.sender()
+        # print(chekbox)
         if chekbox.id == 'A':
-            self.sin_A=float(self.lineEdit_A.text())
+            self.sin_A = float(self.lineEdit_A.text())
             self.label_information.setText("sin-->A : " + self.lineEdit_A.text())
             # print(self.sin_A)
         if chekbox.id == 'F':
@@ -1402,22 +1401,24 @@ class Ui_MainWindow(QtWidgets.QWidget):
             self.sin_B = float(self.lineEdit_B.text())
             self.label_information.setText("sin-->B : " + self.lineEdit_B.text())
             # print(self.sin_B)
+
     def checksum(self, s):
         response_hex_list = []
         for i in range(len(s)):
             response_hex_list.append(hex(ord(s[i]))[2:])
         check_sum_str = hex(sum([int(i, 16) for i in response_hex_list]))[-2:].upper()
         return check_sum_str
+
     def DataAnlysis(self, data, head):
         data2 = data.split('\n')
         matched_index = -1
         i = 0
         length = len(data2)
         while i < length:
-            if head+'\r' == data2[i]:
+            if head + '\r' == data2[i]:
                 matched_index = i
                 break
-            i=i+1
+            i = i + 1
         if matched_index != -1:
             data3 = data2[matched_index + 1].split(' ')[0]
             return data3
@@ -1431,9 +1432,9 @@ class Ui_MainWindow(QtWidgets.QWidget):
             self.ser_motor2.senddata(data)
             self.count = self.count + 1
         else:
-            self.count=0
+            self.count = 0
 
-    def SinRun(self,state):
+    def SinRun(self, state):
         if state == QtCore.Qt.Checked:
             # 发送指令
             self.timer_send.start(20)
@@ -1443,31 +1444,59 @@ class Ui_MainWindow(QtWidgets.QWidget):
             self.count = 0
             self.label_information.setText("sin is stop---")
 
-    def SinDataSend(self,state):
+    def SinDataSend(self, state):
         if state == QtCore.Qt.Checked:
             # 发送指令
             file_add = "D:\PY_Project\python_2022_8_3\sin_wave_cmd.txt"
-            self.wave=sin_wave_cmd(file_add, self.sin_A, self.sin_F, 50, self.sin_D, self.sin_B,1)
-            self.wave_len=len(self.wave)
+            self.wave = sin_wave_cmd(file_add, self.sin_A, self.sin_F, 50, self.sin_D, self.sin_B, 1)
+            self.wave_len = len(self.wave)
             self.label_information.setText("sin is running")
         elif state == QtCore.Qt.Unchecked:
-            self.wave=[]
-            self.wave_len=0
-            self.count=0
+            self.wave = []
+            self.wave_len = 0
+            self.count = 0
             self.label_information.setText("sin is stop")
-    def UserDefine(self,state):
+
+    def UserDefine(self, state):
         if state == QtCore.Qt.Checked:
             # 发送指令
             file_add = "D:\PY_Project\python_2022_8_3\sin_wave_user_cmd.txt"
             # self.wave=sin_wave_cmd(file_add, self.sin_A, self.sin_F, 50, self.sin_D, self.sin_B,1)
-            self.wave = sin_wave_user_cmd(file_add,10)
+            self.wave = sin_wave_user_cmd(file_add, 10)
             self.wave_len = len(self.wave)
             self.label_information.setText("sin-user is running")
         elif state == QtCore.Qt.Unchecked:
-            self.wave=[]
-            self.wave_len=0
-            self.count=0
+            self.wave = []
+            self.wave_len = 0
+            self.count = 0
             self.label_information.setText("sin-user is stop")
+
+    def sin_F_swap(self, state):
+        if state == QtCore.Qt.Checked:
+            # 发送指令
+            file_add = "D:\PY_Project\python_2022_8_3\sin_wave_F_swap_cmd.txt"
+            # self.wave=sin_wave_cmd(file_add, self.sin_A, self.sin_F, 50, self.sin_D, self.sin_B,1)
+            self.wave = sin_wave_sin_F_swap(file_add)
+            self.wave_len = len(self.wave)
+            self.label_information.setText("sin-swap-F is running")
+        elif state == QtCore.Qt.Unchecked:
+            self.wave = []
+            self.wave_len = 0
+            self.count = 0
+            self.label_information.setText("sin-swap-F is stop")
+    def M_randam(self, state):
+        if state == QtCore.Qt.Checked:
+            # 发送指令
+            file_add = "D:\PY_Project\python_2022_8_3\M_randam.txt"
+            # self.wave=sin_wave_cmd(file_add, self.sin_A, self.sin_F, 50, self.sin_D, self.sin_B,1)
+            self.wave = mseq([1,0,1,0,1,1,0,0,0,0,1], file_add,L=100, dt=1 / 50)
+            self.wave_len = len(self.wave)
+            self.label_information.setText("M_random is running")
+        elif state == QtCore.Qt.Unchecked:
+            self.wave = []
+            self.wave_len = 0
+            self.count = 0
+            self.label_information.setText("M_random is stop")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

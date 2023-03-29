@@ -1,5 +1,8 @@
 import cv2
+
+
 def FindTarget(img):
+    cx = cy = 0
     # cv2.imshow('myPicture', img)
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # cv2.imshow("gray", img_gray)
@@ -13,7 +16,7 @@ def FindTarget(img):
     for i, contour in enumerate(contours):
         area = cv2.contourArea(contour)  # 求轮廓的面积，得到第几个轮廓的面积
         # cv2.drawContours(draw_img, contours, i, (0, 0, 255), -1)
-        if area > 5000:
+        if area > 8000:
             cv2.drawContours(draw_img, contours, i, (0, 0, 255), -1)
             M = cv2.moments(contours[i])  # 求矩
             cx = int(M['m10'] / M['m00'])  # 求x坐标
@@ -27,4 +30,4 @@ def FindTarget(img):
     # cv2.imshow('imgs', imgs)
     # cv2.waitKey()
     # cv2.destroyWindow('myPicture')
-    return draw_img,cx,cy
+    return draw_img, cx, cy
