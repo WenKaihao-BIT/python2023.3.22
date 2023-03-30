@@ -21,6 +21,7 @@ import threading
 import datetime
 from Camera_Thread import Camera_Thread
 from Image_process import FindTarget
+from Serial_Thread import Serial_Thread
 
 
 class Ui_MainWindow(QtWidgets.QWidget):
@@ -37,6 +38,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
         ## camera
         self.Camera = Camera_Thread()
+        self.Serial = Serial_Thread()
         self.flag = 0
         self.img = []
 
@@ -1071,7 +1073,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
             # 关闭相机进程
             # self.cap_video.release()
             self.Camera.Close_Camera()
-            self.Camera.exec()
+            # self.Camera.exec()
             # self.timer.stop()
             # self.timer2.stop()
 
@@ -1129,7 +1131,8 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
     def Read_Motor2(self):
         self.motor2 = "COM" + self.spinBox_Motor2_select.text()
-        self.ser_motor2.port = self.motor2
+        # self.ser_motor2.port = self.motor2
+        self.Serial.port=self.motor2
         self.label_information.setText("Motor2 COM-ID:" + self.motor2)
         pass
 
@@ -1157,14 +1160,17 @@ class Ui_MainWindow(QtWidgets.QWidget):
         if state == QtCore.Qt.Unchecked:
             self.flag_motor2 = 0
 
-            self.ser_motor2.close_port()
+            # self.ser_motor2.close_port()
+            self.Serial.close_port()
             self.label_information.setText("Motor2 not enable !")
         elif state == QtCore.Qt.Checked:
             self.flag_motor2 = 1
-            self.ser_motor2.enable_port()
+            # self.ser_motor2.enable_port()
+            self.Serial.enable_port()
             # 电机2初始化
             # self.ser_motor2.send = '\0\r'
-            self.ser_motor2.senddata('\0\r')
+            # self.ser_motor2.senddata('\0\r')
+            self.Serial.senddata('\0\r')
             self.label_information.setText("Motor2 enable success !")
             # the function #
 
@@ -1230,15 +1236,18 @@ class Ui_MainWindow(QtWidgets.QWidget):
     def position_requset(self):
         # self.ser_motor1.send = '1TP?\r'
         self.ser_motor1.senddata('1TP?\r')
-
-        # self.ser_motor2.send = 'PFB<D8>\r'
-        self.ser_motor2.senddata('PFB<D8>\r')
-
         self.data_motor1 = self.ser_motor1.receivedata()
-
-        self.data_motor2 = self.ser_motor2.receivedata()
+        # print(self.data_motor1)
+        # self.ser_motor2.send = 'PFB<D8>\r'
+        # self.ser_motor2.senddata('PFB<D8>\r')
+        self.Serial.senddata('PFB<D8>\r')
+        # self.data_motor2 = self.ser_motor2.receivedata()
+        # time.sleep(0.01)
+        self.data_motor2 = self.Serial.receivedata()
         data_motor2_temp = self.DataAnlysis(self.data_motor2, 'PFB<D8>')
         print('\n\n' + self.data_motor2 + '\n' + self.data_motor2.encode().hex() + '\n' + data_motor2_temp + '\n\n')
+        # print('\n\n'+self.data_motor2+'\n\n')
+
 
     def plot_enable(self):
         if self.flag_motor1 and self.flag_motor2:
@@ -1250,9 +1259,11 @@ class Ui_MainWindow(QtWidgets.QWidget):
                 self.label_information.setText("plot enable!")
                 ## motor2 启动
                 # self.ser_motor2.send = 'ACTIVE<BC>\r'
-                self.ser_motor2.senddata('ACTIVE<BC>\r')
+                # self.ser_motor2.senddata('ACTIVE<BC>\r')
+                self.Serial.senddata('ACTIVE<BC>\r')
                 # self.ser_motor2.send = 'en<D3>\r'
-                self.ser_motor2.senddata('en<D3>\r')
+                # self.ser_motor2.senddata('en<D3>\r')
+                self.Serial.senddata('en<D3>\r')
                 ## 数据清除
                 self.graphicsView_motor1.plot(clear='clear')
                 self.graphicsView_motor2.plot(clear='clear')
@@ -1268,7 +1279,10 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
                 ## 打开时钟信号
                 self.timer_plot.start(50)
-                self.timer_read.start(50)
+                # self.timer_read.start(50)
+                # 绑定触发信号
+                self.Serial.Signal_Serial.connect(self.position_requset)
+                self.Serial.start()
 
                 self.save_data = open("D:/PY_Project/python_2022_8_3/test_save.txt", "w")
 
@@ -1285,20 +1299,25 @@ class Ui_MainWindow(QtWidgets.QWidget):
                 self.label_information.setText("close success!")
                 # motor 关闭
                 # self.ser_motor2.send = 'ACTIVE<BC>\r'
-                self.ser_motor2.senddata('ACTIVE<BC>\r')
+                # self.ser_motor2.senddata('ACTIVE<BC>\r')
+                self.Serial.senddata('ACTIVE<BC>\r')
                 # self.ser_motor2.send = 'k<6B>\r'
-                self.ser_motor2.senddata('k<6B>\r')
+                # self.ser_motor2.senddata('k<6B>\r')
+                self.Serial.senddata('k<6B>\r')
                 # 关闭定时器
                 self.timer_plot.stop()
-                self.timer_read.stop()
+                # self.timer_read.stop()
                 # self.timer_send.stop()
                 # self.count=0
-                # 数据保存
                 self.save_data.close()
+
 
         else:
             self.label_information.setText("check!")
         pass
+
+    def test(self):
+        print("ser-test")
 
     def update_data(self):
         ## motor1
@@ -1429,7 +1448,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
             temp = self.wave[self.count].split('\n')[0]
             data = temp + '<' + self.checksum(temp) + '>\r\n'
             # print(data)
-            self.ser_motor2.senddata(data)
+            self.Serial.senddata(data)
             self.count = self.count + 1
         else:
             self.count = 0
@@ -1439,9 +1458,13 @@ class Ui_MainWindow(QtWidgets.QWidget):
             # 发送指令
             self.timer_send.start(20)
             self.label_information.setText("sin is running---")
+            # 保存
+
         elif state == QtCore.Qt.Unchecked:
             self.timer_send.stop()
             self.count = 0
+            # 数据保存
+            self.save_data.close()
             self.label_information.setText("sin is stop---")
 
     def SinDataSend(self, state):
@@ -1484,12 +1507,13 @@ class Ui_MainWindow(QtWidgets.QWidget):
             self.wave_len = 0
             self.count = 0
             self.label_information.setText("sin-swap-F is stop")
+
     def M_randam(self, state):
         if state == QtCore.Qt.Checked:
             # 发送指令
             file_add = "D:\PY_Project\python_2022_8_3\M_randam.txt"
             # self.wave=sin_wave_cmd(file_add, self.sin_A, self.sin_F, 50, self.sin_D, self.sin_B,1)
-            self.wave = mseq([1,0,1,0,1,1,0,0,0,0,1], file_add,L=100, dt=1 / 50)
+            self.wave = mseq([1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1], file_add, L=100, dt=1 / 50)
             self.wave_len = len(self.wave)
             self.label_information.setText("M_random is running")
         elif state == QtCore.Qt.Unchecked:
@@ -1497,6 +1521,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
             self.wave_len = 0
             self.count = 0
             self.label_information.setText("M_random is stop")
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

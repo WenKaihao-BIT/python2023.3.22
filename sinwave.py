@@ -78,7 +78,7 @@ def sin_wave_user_cmd(file_add, t):
 
 def sin_wave_sin_F_swap(file_add):
     file = open(file_add, 'w')
-    dt = 1 / 50
+    dt = 1 / 20
     # x = np.arange(0, t, dt)
     # y = np.zeros(len(x))
     # v = np.zeros(len(x))
@@ -134,11 +134,11 @@ if __name__ == '__main__':
     # file_add="D:\PY_Project\python_2022_8_3\sin_wave_cmd.txt"
     # file_add = "D:\PY_Project\python_2022_8_3\sin_wave_user_cmd.txt"
     # wave=sin_wave_user_cmd(file_add,10)
-    # file_add = "D:\PY_Project\python_2022_8_3\sin_wave_F_swap_cmd.txt"
-    # sin_wave_sin_F_swap(file_add)
+    file_add = "D:\PY_Project\python_2022_8_3\sin_wave_F_swap_cmd.txt"
+    sin_wave_sin_F_swap(file_add)
     # M_randam(100)
-    file_add="D:\PY_Project\python_2022_8_3\M_randam.txt"
-    mseq([1,0,1,0,1,1,0,0,0,0,1], file_add,L=100, dt=1/50)
+    # file_add="D:\PY_Project\python_2022_8_3\M_randam.txt"
+    # mseq([1,0,1,0,1,1,0,0,0,0,1], file_add,L=100, dt=1/50)
     # msg="MOVEABS 0.05 5.0 \n"*10
     # print(msg)
 
