@@ -16,7 +16,7 @@ def FindTarget(img):
     for i, contour in enumerate(contours):
         area = cv2.contourArea(contour)  # 求轮廓的面积，得到第几个轮廓的面积
         # cv2.drawContours(draw_img, contours, i, (0, 0, 255), -1)
-        if area > 8000:
+        if area > 30000:
             cv2.drawContours(draw_img, contours, i, (0, 0, 255), -1)
             M = cv2.moments(contours[i])  # 求矩
             cx = int(M['m10'] / M['m00'])  # 求x坐标

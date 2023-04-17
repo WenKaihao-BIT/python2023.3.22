@@ -8,7 +8,7 @@ class serial_port(object):
         self.send = ''
         self.receive = ''
     def enable_port(self):
-        self.ser = serial.Serial(self.port, self.rate, timeout=0.05)
+        self.ser = serial.Serial(self.port, self.rate, timeout=0.02)
         self.ser.flushInput()
     def close_port(self):
         self.ser.close()
